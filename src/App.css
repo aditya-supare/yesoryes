@@ -1,0 +1,204 @@
+.App {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f7;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  overflow: hidden;
+  position: relative;
+}
+
+.container {
+  text-align: center;
+  padding: 4rem 3rem;
+  max-width: 800px;
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.question {
+  font-size: 3.5rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: #86868b;
+  margin-bottom: 3rem;
+  font-weight: 400;
+}
+
+.button-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 120px;
+}
+
+.btn {
+  position: relative;
+  padding: 0.875rem 2rem;
+  font-size: 1.0625rem;
+  font-weight: 400;
+  border: none;
+  border-radius: 980px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  letter-spacing: -0.01em;
+}
+
+.yes-btn {
+  background: #0071e3;
+  color: #fff;
+  min-width: 120px;
+}
+
+.yes-btn:hover {
+  background: #0077ed;
+  transform: scale(1.02);
+  box-shadow: 0 4px 20px rgba(0, 113, 227, 0.3);
+}
+
+.yes-btn:active {
+  transform: scale(0.98);
+}
+
+.no-btn {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
+  min-width: 120px;
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+.no-btn:hover {
+  background: #e8e8ed;
+}
+
+.message {
+  animation: messageIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.success-icon {
+  margin: 0 auto 2rem;
+  animation: checkAnimation 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes checkAnimation {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-45deg);
+  }
+  60% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+.success-icon svg {
+  display: block;
+  margin: 0 auto;
+}
+
+.success-icon circle {
+  animation: circleAnimation 0.6s ease-out;
+  stroke-dasharray: 240;
+  stroke-dashoffset: 240;
+}
+
+@keyframes circleAnimation {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.success-icon path {
+  animation: checkPathAnimation 0.4s 0.3s ease-out forwards;
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+}
+
+@keyframes checkPathAnimation {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.message h2 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.message p {
+  font-size: 1.25rem;
+  color: #86868b;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 2rem 1.5rem;
+  }
+
+  .question {
+    font-size: 2.5rem;
+  }
+
+  .subtitle {
+    font-size: 1.125rem;
+  }
+
+  .button-container {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .btn {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .message h2 {
+    font-size: 2rem;
+  }
+
+  .message p {
+    font-size: 1.125rem;
+  }
+}
