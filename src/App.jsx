@@ -7,6 +7,8 @@ function App() {
   const [noButtonText, setNoButtonText] = useState('No')
   const [chaseCount, setChaseCount] = useState(0)
   const [isVulnerable, setIsVulnerable] = useState(false)
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 })
+  const [isClicking, setIsClicking] = useState(false)
   const noButtonRef = useRef(null)
   const animationFrameRef = useRef(null)
   const lastMoveTime = useRef(0)
@@ -16,7 +18,7 @@ function App() {
   }
 
   const handleNoClick = () => {
-    setNoButtonText('Yes! Bleh no escape')
+    setNoButtonText('Yes! Bleh no escape!! ;3')
     setTimeout(() => {
       setShowMessage(true)
     }, 500)
@@ -37,6 +39,8 @@ function App() {
 
   useEffect(() => {
     const handleMouseMove = (e) => {
+      setCursorPosition({ x: e.clientX, y: e.clientY })
+
       if (!noButtonRef.current || showMessage || isVulnerable) return
 
       const now = Date.now()
@@ -80,11 +84,22 @@ function App() {
           let newX = noButtonPosition.x + Math.cos(angle) * moveDistance
           let newY = noButtonPosition.y + Math.sin(angle) * moveDistance
 
-          // Conservative bounds to prevent scrollbars
-          const maxX = (viewportWidth / 2) - 200
-          const maxY = (viewportHeight / 2) - 200
-          const minX = -(viewportWidth / 2) + 200
-          const minY = -(viewportHeight / 2) + 200
+          // Get button dimensions for proper bounds calculation
+          const buttonWidth = buttonRect.width
+          const buttonHeight = buttonRect.height
+          
+          // Calculate the original button center position
+          const containerRect = noButtonRef.current.parentElement.getBoundingClientRect()
+          const originalCenterX = containerRect.left + containerRect.width / 2
+          const originalCenterY = containerRect.top + containerRect.height / 2
+
+          // Calculate max translation to keep button fully visible
+          // Use more conservative padding to ensure button stays well within viewport
+          const padding = 50
+          const maxX = (viewportWidth / 2) - (buttonWidth / 2) - padding - (originalCenterX - viewportWidth / 2)
+          const minX = -(originalCenterX - padding - buttonWidth / 2)
+          const maxY = (viewportHeight / 2) - (buttonHeight / 2) - padding - (originalCenterY - viewportHeight / 2)
+          const minY = -(originalCenterY - padding - buttonHeight / 2)
 
           newX = Math.max(minX, Math.min(maxX, newX))
           newY = Math.max(minY, Math.min(maxY, newY))
@@ -94,10 +109,22 @@ function App() {
       })
     }
 
+    const handleMouseDown = () => {
+      setIsClicking(true)
+    }
+
+    const handleMouseUp = () => {
+      setIsClicking(false)
+    }
+
     window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mousedown', handleMouseDown)
+    window.addEventListener('mouseup', handleMouseUp)
     
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mousedown', handleMouseDown)
+      window.removeEventListener('mouseup', handleMouseUp)
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
       }
@@ -105,12 +132,29 @@ function App() {
   }, [noButtonPosition, showMessage, isVulnerable])
 
   return (
-    <div className="App">
+    <div className={`App ${showMessage ? 'sage-green' : ''}`}>
+      <div 
+        className={`cursor-heart ${isClicking ? 'clicking' : ''}`}
+        style={{
+          left: cursorPosition.x,
+          top: cursorPosition.y
+        }}
+      ></div>
+
       <div className="container">
         {!showMessage ? (
           <>
-            <h1 className="question">Would you like to continue?</h1>
-            <p className="subtitle">Choose your preference</p>
+            <div className="video-container">
+              <video 
+                autoPlay 
+                loop 
+                muted 
+                playsInline
+                className="header-video"
+              >
+                <source src="/videos/GRASSDOGS.mp4" type="video/mp4" />
+              </video>
+            </div>
             
             <div className="button-container">
               <button 
@@ -134,14 +178,17 @@ function App() {
           </>
         ) : (
           <div className="message">
-            <div className="success-icon">
-              <svg width="80" height="80" viewBox="0 0 80 80">
-                <circle cx="40" cy="40" r="38" fill="none" stroke="#34c759" strokeWidth="4"/>
-                <path d="M 25 40 L 35 50 L 55 30" fill="none" stroke="#34c759" strokeWidth="4" strokeLinecap="round"/>
-              </svg>
+            <div className="video-container afteryes-video">
+              <video 
+                autoPlay 
+                loop 
+                muted 
+                playsInline
+                className="header-video"
+              >
+                <source src="/videos/afteryes.mp4" type="video/mp4" />
+              </video>
             </div>
-            <h2>Thank you</h2>
-            <p>Your response has been recorded.</p>
           </div>
         )}
       </div>
