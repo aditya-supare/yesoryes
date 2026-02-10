@@ -9,9 +9,53 @@ function App() {
   const [isVulnerable, setIsVulnerable] = useState(false)
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 })
   const [isClicking, setIsClicking] = useState(false)
+  const [particles, setParticles] = useState([])
+  const [trails, setTrails] = useState([])
   const noButtonRef = useRef(null)
   const animationFrameRef = useRef(null)
   const lastMoveTime = useRef(0)
+  const trailIdCounter = useRef(0)
+  const movesSinceLastTrail = useRef(0)
+  const previousButtonPosition = useRef(null)
+  const audioRef = useRef(null)
+
+  // Generate floating heart particles
+  useEffect(() => {
+    const newParticles = Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      startBottom: Math.random() * -100,
+      animationDuration: 15 + Math.random() * 10,
+      animationDelay: Math.random() * 15,
+      size: 20 + Math.random() * 20
+    }))
+    setParticles(newParticles)
+
+    // Try to autoplay music
+    const playAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.play().catch(err => console.log('Autoplay prevented:', err))
+      }
+    }
+    
+    // Try immediately
+    playAudio()
+    
+    // Also try on first user interaction
+    const handleInteraction = () => {
+      playAudio()
+      document.removeEventListener('click', handleInteraction)
+      document.removeEventListener('keydown', handleInteraction)
+    }
+    
+    document.addEventListener('click', handleInteraction)
+    document.addEventListener('keydown', handleInteraction)
+    
+    return () => {
+      document.removeEventListener('click', handleInteraction)
+      document.removeEventListener('keydown', handleInteraction)
+    }
+  }, [])
 
   const handleYesClick = () => {
     setShowMessage(true)
@@ -41,11 +85,22 @@ function App() {
     const handleMouseMove = (e) => {
       setCursorPosition({ x: e.clientX, y: e.clientY })
 
+      // Check for trail collection
+      setTrails(prevTrails => 
+        prevTrails.filter(trail => {
+          const distance = Math.sqrt(
+            Math.pow(e.clientX - trail.x, 2) + Math.pow(e.clientY - trail.y, 2)
+          )
+          // Collect trail if cursor is within 30px
+          return distance > 30
+        })
+      )
+
       if (!noButtonRef.current || showMessage || isVulnerable) return
 
       const now = Date.now()
-      // Reduced throttle to 30ms for more responsive movement
-      if (now - lastMoveTime.current < 30) return
+      // Ultra-fast response - 20ms for instant reaction
+      if (now - lastMoveTime.current < 20) return
       lastMoveTime.current = now
 
       // Cancel previous animation frame
@@ -68,9 +123,28 @@ function App() {
           Math.pow(mouseX - buttonCenterX, 2) + Math.pow(mouseY - buttonCenterY, 2)
         )
 
-        // Massive detection radius of 300px - detects cursor from far away
-        if (distance < 300) {
+        // Massive detection radius of 400px - detects cursor from extremely far away
+        if (distance < 400) {
           setChaseCount(prev => prev + 1)
+          movesSinceLastTrail.current++
+
+          // Add trail only occasionally (every 12-18 moves) at the OLD position
+          const trailFrequency = 12 + Math.floor(Math.random() * 7)
+          if (movesSinceLastTrail.current >= trailFrequency && previousButtonPosition.current) {
+            const newTrail = {
+              id: trailIdCounter.current++,
+              x: previousButtonPosition.current.x,
+              y: previousButtonPosition.current.y
+            }
+            setTrails(prev => [...prev, newTrail])
+            movesSinceLastTrail.current = 0
+          }
+
+          // Store current position before moving
+          previousButtonPosition.current = {
+            x: buttonCenterX,
+            y: buttonCenterY
+          }
 
           const viewportWidth = window.innerWidth
           const viewportHeight = window.innerHeight
@@ -78,8 +152,8 @@ function App() {
           // Calculate direction away from mouse
           const angle = Math.atan2(buttonCenterY - mouseY, buttonCenterX - mouseX)
           
-          // Much larger movement distance - 400-500px
-          const moveDistance = 400 + Math.random() * 100
+          // Extremely large movement distance - 500-700px
+          const moveDistance = 500 + Math.random() * 200
           
           let newX = noButtonPosition.x + Math.cos(angle) * moveDistance
           let newY = noButtonPosition.y + Math.sin(angle) * moveDistance
@@ -133,6 +207,41 @@ function App() {
 
   return (
     <div className={`App ${showMessage ? 'sage-green' : ''}`}>
+      {/* Background music */}
+      <audio ref={audioRef} loop autoPlay>
+        <source src="/audio/song.mp3" type="audio/mpeg" />
+      </audio>
+
+      {/* Pixelated heart particles */}
+      {particles.map(particle => (
+        <div
+          key={particle.id}
+          className="pixel-heart"
+          style={{
+            left: `${particle.left}%`,
+            bottom: `${particle.startBottom}%`,
+            animationDuration: `${particle.animationDuration}s`,
+            animationDelay: `${particle.animationDelay}s`,
+            width: `${particle.size}px`,
+            height: `${particle.size}px`
+          }}
+        />
+      ))}
+
+      {/* Mwah trails */}
+      {trails.map(trail => (
+        <div
+          key={trail.id}
+          className="mwah-trail"
+          style={{
+            left: trail.x,
+            top: trail.y
+          }}
+        >
+          mwah
+        </div>
+      ))}
+
       <div 
         className={`cursor-heart ${isClicking ? 'clicking' : ''}`}
         style={{
@@ -186,7 +295,7 @@ function App() {
                 playsInline
                 className="header-video"
               >
-                <source src="/videos/afteryes.mp4" type="video/mp4" />
+                <source src="/videos/USbread.mp4" type="video/mp4" />
               </video>
             </div>
           </div>
